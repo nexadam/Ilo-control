@@ -259,7 +259,12 @@
                 </div>
                 <div class="config-row">
                     <label>Mot de passe :</label>
-                    <input type="password" id="password" placeholder="Mot de passe iLO">
+                    <input type="password" id="password" placeholder="Votre mot de passe iLO" value="">
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn btn-refresh" onclick="getStatus()" style="min-width: 200px;">
+                        🔗 Tester la connexion
+                    </button>
                 </div>
             </div>
             
@@ -324,11 +329,28 @@
             }
             
             getConfig() {
-                return {
+                const config = {
                     address: document.getElementById('iloAddress').value,
                     username: document.getElementById('username').value,
                     password: document.getElementById('password').value
                 };
+                
+                // Validation
+                if (!config.address) {
+                    this.log('❌ Adresse iLO manquante !', 'error');
+                    return null;
+                }
+                if (!config.username) {
+                    this.log('❌ Nom d\'utilisateur manquant !', 'error');
+                    return null;
+                }
+                if (!config.password) {
+                    this.log('❌ Mot de passe manquant !', 'error');
+                    return null;
+                }
+                
+                this.log(`✅ Configuration: ${config.username}@${config.address}`, 'success');
+                return config;
             }
             
             log(message, type = 'info') {
@@ -346,8 +368,8 @@
             async makeILORequest(command, params = {}) {
                 const config = this.getConfig();
                 
-                if (!config.address || !config.username || !config.password) {
-                    throw new Error('Veuillez remplir tous les champs de configuration');
+                if (!config) {
+                    throw new Error('Configuration incomplète. Remplissez tous les champs ci-dessus.');
                 }
                 
                 // Construire l'URL
